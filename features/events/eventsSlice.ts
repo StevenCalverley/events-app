@@ -10,10 +10,15 @@ import {
   deleteEventById as apiDeleteEventById,
   getEvents,
   subscribeToEvents,
-  Event,
   unsubscribeToEvents,
 } from "../../services/eventApi";
 
+import { createStandaloneToast } from "@chakra-ui/react";
+
+const toast = createStandaloneToast();
+
+// Types
+import { IEvent } from "../../types/firestore/Event";
 import { RootState } from "../../store/index";
 
 type EventState = {
@@ -21,8 +26,8 @@ type EventState = {
   error: string | null;
 };
 
-const eventsAdapter = createEntityAdapter<Event>({
-  sortComparer: (a, b) => b.createdAt.localeCompare(a.createdAt),
+const eventsAdapter = createEntityAdapter<IEvent>({
+  sortComparer: (a, b) => b.date.localeCompare(a.date),
 });
 
 const initialState = eventsAdapter.getInitialState<EventState>({
@@ -37,7 +42,7 @@ export const fetchEvents = createAsyncThunk("events/fetchEvents", async () => {
 
 export const addEvent = createAsyncThunk(
   "events/addEvent",
-  async (data: Partial<Event>) => {
+  async (data: Partial<IEvent>) => {
     const event = await apiAddEvent(data);
     return event;
   }
@@ -60,7 +65,6 @@ export const deleteEvent = createAsyncThunk(
 
 export const subscribe = createAsyncThunk("events/subscribe", (_, thunkAPI) => {
   console.log("Subscribing to Events...");
-
   const { dispatch } = thunkAPI;
 
   subscribeToEvents((change) => {
@@ -76,7 +80,6 @@ export const subscribe = createAsyncThunk("events/subscribe", (_, thunkAPI) => {
 
 export const unsubscribe = createAsyncThunk("events/unsubscribe", () => {
   console.log("Unsubscribing to Events...");
-
   unsubscribeToEvents();
 });
 
@@ -95,6 +98,12 @@ const eventSlice = createSlice({
 
       if (action.payload.type === "removed") {
         eventsAdapter.removeOne(state, action.payload.event.id);
+        toast({
+          title: "Event Deleted",
+          description: `Event Delete: ${action.payload.event.title}`,
+          position: "top-right",
+          status: "error",
+        });
       }
     },
   },
@@ -111,12 +120,6 @@ const eventSlice = createSlice({
       .addCase(fetchEvents.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message as string;
-      })
-      .addCase(subscribe.pending, (state, action) => {
-        state.status = "loading";
-      })
-      .addCase(subscribe.fulfilled, (state, action) => {
-        state.status = "succeeded";
       });
   },
 });
@@ -129,5 +132,6 @@ export const {
   selectAll: selectAllEvents,
   selectById: selectEventById,
   selectIds: selectEventIds,
+  selectTotal: selectEventTotals,
   // Pass in a selector that returns the posts slice of state
 } = eventsAdapter.getSelectors<RootState>((state) => state.events);

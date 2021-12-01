@@ -1,12 +1,12 @@
 import {
   collection,
   query,
+  where,
   doc,
   addDoc,
-  getDocs,
   getDoc,
+  getDocs,
   updateDoc,
-  deleteDoc,
   onSnapshot,
   serverTimestamp,
   QueryDocumentSnapshot,
@@ -31,6 +31,7 @@ const converter = {
   toFirestore: (data: WithFieldValue<Event>): DocumentData => {
     return {
       ...data,
+      isDeleted: false,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -48,6 +49,7 @@ const converter = {
   },
 };
 
+// Firestore Refs
 const eventsRef = collection(db, "events").withConverter(converter);
 
 export const addEvent = async (event: Partial<Event>) => {
@@ -64,7 +66,8 @@ export const getEvents = async () => {
   try {
     let events: Event[] = [];
 
-    const querySnapshot = await getDocs(eventsRef);
+    const getEventsQuery = query(eventsRef, where("isDeleted", "==", false));
+    const querySnapshot = await getDocs(getEventsQuery);
     querySnapshot.forEach((doc) => {
       const event = doc.data();
 
@@ -113,7 +116,10 @@ export const updateEventById = async (
 export const deleteEventById = async (eventId: string) => {
   try {
     const docRef = doc(db, "events", eventId);
-    const docSnap = await deleteDoc(docRef);
+    const docSnap = await updateDoc(docRef, {
+      isDeleted: true,
+      updatedAt: serverTimestamp(),
+    });
     return;
   } catch (e) {
     console.error("Error updating events ", e);
@@ -130,8 +136,9 @@ export const subscribeToEvents = (
   ) => void
 ): void => {
   try {
-    const q = query(eventsRef);
-    unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const getEventsQuery = query(eventsRef, where("isDeleted", "==", false));
+
+    unsubscribe = onSnapshot(getEventsQuery, (querySnapshot) => {
       querySnapshot.docChanges().forEach(callBackFn);
     });
   } catch (e) {

@@ -1,55 +1,28 @@
-import { useEffect } from "react";
 import NextLink from "next/link";
-import { Box, Heading, SimpleGrid, Spinner, Link } from "@chakra-ui/react";
+import { Box, Heading, SimpleGrid, Link, Badge } from "@chakra-ui/react";
 
 import {
-  fetchEvents,
   selectEventIds,
-  subscribe,
-  unsubscribe,
+  selectEventTotals,
 } from "../../features/events/eventsSlice";
-import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import { useAppSelector } from "../../store/hooks";
 
 import AddEvent from "../../features/events/AddEvent";
 import EventDetail from "../../features/events/EventDetail";
 
 const Events = () => {
-  const dispatch = useAppDispatch();
-
+  const totalEvents = useAppSelector(selectEventTotals);
   const orderedEventIds = useAppSelector(selectEventIds);
-  const eventStatus = useAppSelector((state) => state.events.status);
-  const error = useAppSelector((state) => state.events.error);
-
-  useEffect(() => {
-    dispatch(subscribe());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (eventStatus === "idle") {
-      // dispatch(fetchEvents());
-    }
-  }, [eventStatus, dispatch]);
-
-  if (eventStatus === "loading") {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minH="100vh"
-      >
-        <Box position="absolute" minH="100vh" inset={0} bg="blackAlpha.700" />
-        <Spinner color="white" />
-      </Box>
-    );
-  }
 
   return (
     <Box mx="auto" maxW="7xl" mt="8">
       <Heading>Events Page</Heading>
       <SimpleGrid mt={8} columns={2} gap={4}>
         <Box fontSize="sm">
-          <Heading>Events</Heading>
+          <Box display="flex" alignItems="flex-start">
+            <Heading>Events</Heading>
+            <Badge ml={3}>{totalEvents}</Badge>
+          </Box>
           {orderedEventIds.map((eventId) => {
             return (
               <NextLink key={eventId} href={`/events/${eventId}`} passHref>
