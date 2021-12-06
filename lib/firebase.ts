@@ -1,5 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection } from "firebase/firestore";
+
+import { eventsConverter } from "./converters";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCrlocrMFuyyljTQHKM88ZSzcGNbiB1C_s",
@@ -14,3 +16,7 @@ const app = initializeApp(firebaseConfig);
 
 export const firestore = getFirestore();
 export default app;
+
+export const collections = {
+  events: collection(firestore, "events").withConverter(eventsConverter),
+};

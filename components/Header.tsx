@@ -17,8 +17,9 @@ const Header = () => {
             <Heading as="h1">Events App</Heading>
           </Link>
         </NextLink>
-        <Box as="nav" ml="8">
+        <Box as="nav" ml="8" display="flex">
           <NextLink href="/events">Events</NextLink>
+          <NextLink href="/test">Test</NextLink>
         </Box>
       </Box>
     </Box>
