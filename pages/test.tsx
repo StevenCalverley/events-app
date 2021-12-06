@@ -24,7 +24,6 @@ const Test: NextPage = () => {
   const { isLoading, ...events } = useEvents("events", [
     where("isDeleted", "!=", true),
   ]);
-  console.log(events);
   if (isLoading) {
     return (
       <Box mx="auto" maxW="7xl" mt="8">

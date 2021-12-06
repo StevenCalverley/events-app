@@ -13,9 +13,9 @@ import Header from "../components/Header";
 const client = new QueryClient();
 
 function MyApp({ Component, pageProps }: AppProps) {
-  // useEffect(() => {
-  //   store.dispatch(subscribe());
-  // }, []);
+  useEffect(() => {
+    store.dispatch(subscribe());
+  }, []);
 
   return (
     <ChakraProvider>
