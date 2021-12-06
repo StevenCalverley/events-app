@@ -21,9 +21,10 @@ function renderEvent(event: IEvent) {
   );
 }
 const Test: NextPage = () => {
-  const { isLoading, ...events } = useEvents("events", [
-    where("isDeleted", "!=", true),
-  ]);
+  const { isLoading, ...events } = useEvents(
+    ["events", "active"],
+    [where("isDeleted", "!=", true)]
+  );
   if (isLoading) {
     return (
       <Box mx="auto" maxW="7xl" mt="8">

@@ -14,22 +14,25 @@ function isQueryConstraints(value: unknown): value is QueryConstraint[] {
 
 export function useEvents(
   key: QueryKey,
-  constraintsOrNamedQuery?: QueryConstraint[] | string
+  constraints?: QueryConstraint[]
 ): UseQueryResult<IEvent[]> {
   const collection = collections.events;
   let ref: Query<IEvent> | NamedQuery<IEvent>;
 
-  if (constraintsOrNamedQuery) {
-    if (isQueryConstraints(constraintsOrNamedQuery)) {
-      ref = query(collection, ...constraintsOrNamedQuery);
-    } else {
-      ref = namedQuery(firestore, constraintsOrNamedQuery);
-    }
+  if (constraints) {
+    ref = query(collection, ...constraints);
   } else {
     ref = query(collection);
   }
 
-  return useFirestoreQueryData<IEvent>(key, ref, {
-    subscribe: true,
-  });
+  return useFirestoreQueryData<IEvent>(
+    key,
+    ref,
+    {
+      subscribe: true,
+    },
+    {
+      refetchOnMount: "always",
+    }
+  );
 }
